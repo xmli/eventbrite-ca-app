@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 //import HttpClientModule
 import { HttpClientModule } from "@angular/common/http";
@@ -18,7 +19,8 @@ import { OrderByPipe } from './pipes/order-by.pipe';
   ],
   imports: [
     BrowserModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule
   ],
   providers: [EventbriteService],
   bootstrap: [AppComponent]
