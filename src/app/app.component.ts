@@ -19,7 +19,9 @@ export class AppComponent implements OnInit{
 
   constructor(private _eventbriteService: EventbriteService) { }
   
-  ngOnInit() {
+  ngOnInit() { }
+
+  getDataFromEventbrite() {
     console.log("Getting data from Eventbrite...");
     this._eventbriteService.getEvenbriteOrders()
     .subscribe(
@@ -43,17 +45,9 @@ export class AppComponent implements OnInit{
       this._eventbriteService.getEventbriteEvent(ev_id)
       .subscribe(
         data => {
-          // var ev_url = data.url;
-          // var ev_dtstart = this.parseDate(data.start.utc);
-          // var ev_dtend = this.parseDate(data.end.utc);
-          // var ev_summary = data.name.text;
-          // var ev_desc = data.description.text;
-          // if(data.venue_id !== null) {
-          //   this.getVenueLoc(data.venue_id);
-          //   console.log(this.my_venue);
-          // }
-          this.buildEvent(data.url, this.parseDate(data.start.utc), this.parseDate(data.end.utc), data.name.text, data.description.text, "");
-          
+          if(data.venue_id !== null) {
+            this.buildEvent(data.url, data.start.utc, data.end.utc, data.name.text, data.description.text, data.venue_id);
+          }
         },
         (err: HttpErrorResponse) => {
           if (err.error instanceof Error) {
@@ -63,15 +57,42 @@ export class AppComponent implements OnInit{
           }
         }
       );
-      // console.log(element);
     });
   }
 
-  getVenueLoc(venue_id) {
+  buildEvent(url, raw_dtstart, raw_dtend, summary, desc, venue_id){
+    var file_begin = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT";
+    var file_end = "END:VEVENT\nEND:VCALENDAR";    
+    
+    var text = file_begin+"\n" 
+    + "URL:" + url + "\n" 
+    + "DTSTART:" + this.parseDate(raw_dtstart) + "\n" 
+    + "DTEND:" + this.parseDate(raw_dtend)+"\n" 
+    + "SUMMARY:" + summary+"\n" 
+    + "LOCATION:"
+    
     this._eventbriteService.getVenueLocation(venue_id)
     .subscribe(
       data => {
-        this.my_venue = data['name']
+        if(data.name !== null) {
+          var loc = data.name;
+          if(data.address.localized_address_display !== null) {
+            loc += ', ' + data.address.localized_address_display;     
+          }     
+        }
+        console.log(loc);
+        
+        text += loc + '\n' 
+        + "DESCRIPTION:" + desc + "\n"                
+        + file_end;
+        this.my_events.push({
+          filename:summary+".ics",
+          eventname:summary,
+          eventdate:raw_dtstart,
+          body:text,
+          url:url
+        })
+        console.log(text);
       },
       (err: HttpErrorResponse) => {
         if (err.error instanceof Error) {
@@ -83,41 +104,6 @@ export class AppComponent implements OnInit{
     );
   }
 
-  // setMyVenueLoc(venue:EventbriteVenueInterface) {
-  //   this.my_venue = venue['name'] + venue['address']['localized_address_display'];
-  // }
-
-  // getMyVenueLoc() {
-  //   return this.my_venue;
-  // }
-
-  parseDate(utc_str) {
-    var parsed_date = utc_str.replace(/-|:/g, "");
-    return parsed_date;
-  }
-
-  buildEvent(url, dtstart, dtend, summary, desc, loc){
-    var text = this.createiCalEvent(url, dtstart, dtend, summary, desc, loc);
-    this.my_events.push({
-      filename:summary+".ics",
-      eventdate:dtstart,
-      body:text
-    })
-  }
-
-  createiCalEvent(url, dtstart, dtend, summary, desc, loc) {
-    var file_begin = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT";
-    var file_end = "END:VEVENT\nEND:VCALENDAR";
-    return file_begin+"\n" 
-    + "URL:" + url + "\n" 
-    + "DTSTART:" + dtstart + "\n" 
-    + "DTEND:" + dtend+"\n" 
-    + "SUMMARY:" + summary+"\n" 
-    + "DESCRIPTION:" + desc+"\n" 
-    + "LOCATION:" + loc+"\n" 
-    + file_end;
-  }
-  
   downloadCalendar(event:IcalendarInfoInterface) {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(event.body));
@@ -126,6 +112,11 @@ export class AppComponent implements OnInit{
     // document.body.appendChild(element);
     element.click();
     // document.body.removeChild(element);
+  }
+
+  parseDate(utc_str) {
+    var parsed_date = utc_str.replace(/-|:/g, "");
+    return parsed_date;
   }
 
   title = 'Eventbrite Calendar App';

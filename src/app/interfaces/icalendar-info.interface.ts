@@ -1,5 +1,7 @@
 export interface IcalendarInfoInterface {
     filename:string,
+    eventname:string,
     eventdate:string,
-    body:string
+    body:string,
+    url:string
 }

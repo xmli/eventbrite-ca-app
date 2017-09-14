@@ -9,10 +9,12 @@ import { AppComponent } from './app.component';
 
 //import services
 import { EventbriteService } from "./services/eventbrite.service";
+import { OrderByPipe } from './pipes/order-by.pipe';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    OrderByPipe
   ],
   imports: [
     BrowserModule,

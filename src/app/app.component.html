@@ -1,11 +1,22 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div>  
-  <h1>
-    Welcome to {{title}}!
-  </h1>
-  <!-- <pre>{{my_orders | json}}</pre> -->
-</div>
-  <div *ngFor="let cal of my_events">
-    <input type="button" id="dwn-btn" (click)="downloadCalendar(cal)" value="{{cal.filename}}"/>
-    {{cal.eventdate}}
+<div class="jumbotron">  
+  <div class="container">
+    <h1>{{title}}</h1>
   </div>
+  <div class="container">
+    <button type="button" class="btn btn-primary" (click)="getDataFromEventbrite()">Get Events</button>      
+  </div>
+</div>
+<div class="container">
+  <div class="row" *ngFor="let cal of my_events">
+    <div class="col-md-2">
+      {{cal.eventdate | date}}      
+    </div>
+    <div class="col-md-6">
+      {{cal.eventname}}
+    </div>
+    <div class="col-md-4">
+      <input type="button" id="dwn-btn" (click)="downloadCalendar(cal)" value="Download"/>        
+    </div>
+  </div>
+</div>
