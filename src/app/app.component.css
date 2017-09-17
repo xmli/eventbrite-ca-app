@@ -1,3 +1,7 @@
 .btn {
     cursor: pointer;
 }
+
+.sortable {
+    cursor: pointer;
+}

@@ -143,20 +143,20 @@ export class AppComponent implements OnInit{
       if(location.name !== null) {
         text += location.name;  
         if(location.address.localized_address_display !== null) {
-          text += ' - ' + location.address.localized_address_display + '\n';            
+          text += ' - ' + this.parseVenue(location.address.localized_address_display) + '\n';            
         }   
       } else {
         if(location.address.localized_address_display !== null) {
-          text += location.address.localized_address_display + '\n';            
+          text += this.parseVenue(location.address.localized_address_display) + '\n';            
         } 
       }
     }
 
-    text += "DESCRIPTION:" + event.description.text + "\n"                
+    text += "DESCRIPTION:" + this.parseDescription(this.removeFirstNewLine(event.description.text)) + "\n"                
     + file_end;
     
     this.my_calevents.push({
-      filename:event.name.text+".ics",
+      filename:this.removeLastFileNameSpace(event.name.text)+".ics",
       eventname:event.name.text,
       eventdate:event.start.utc,
       calbody:text,
@@ -188,9 +188,31 @@ export class AppComponent implements OnInit{
     return parsed_date;
   }
 
-  truncateDescription(desc_str) {
-    return desc_str.substring(0,200) + "..."
+  parseVenue(venue) {
+    return venue.replace(/,/g, " ");
   }
 
-  title = 'My App';
+  parseDescription(desc:string) {
+    var firstNewLine = desc.indexOf('\n');
+    return desc.substring(0, firstNewLine);
+  }
+
+  truncateDescription(desc_str) {
+    return desc_str.substring(0,250) + "..."
+  }
+
+  removeLastFileNameSpace(fn) {
+    return fn.replace(/\s+$/, '');
+  }
+
+  removeFirstNewLine(desc:string) {
+    for (var i = 0; i < desc.length || i < 3; i++) {
+      if (desc.indexOf('\n') == 0) {
+        desc = desc.substring(1);
+      }
+    }
+    return desc;
+  }
+
+  title = 'Quick Eventbrite Download';
 }

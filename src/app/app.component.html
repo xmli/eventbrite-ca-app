@@ -14,23 +14,30 @@
       <table class="table table-hover">
           <thead class="thead-default">
             <tr class="row">
-              <th class="col-sm-2">Date
-                <button type="button" class="btn btn-info btn-small" (click)="sortUpdate()">Sort</button>                      
+              <th class="col-sm-3">
+                <div>Date 
+                  <a class="sortable" (click)="sortUpdate()" *ngIf="sort_NewToOld">▲</a>
+                  <a class="sortable" (click)="sortUpdate()" *ngIf="!sort_NewToOld">▼</a>    
+                </div>             
               </th>
-              <th class="col-sm-6">Event</th>
-              <th class="col-sm-4">Calendar</th>
+              <th class="col-sm-7">
+                <div>Event</div>
+              </th>
+              <th class="col-sm-2">
+                <div>Calendar</div>
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr class="row" *ngFor="let cal of my_calevents">
-              <td class="col-sm-2">
+              <td class="col-sm-3">
                 {{cal.eventdate | date}}
               </td>
-              <td class="col-sm-6">
+              <td class="col-sm-7">
                 <a [href]="cal.url" target="_blank">{{cal.eventname}}</a><hr>
                 <span>{{truncateDescription(cal.description)}}</span>
               </td>
-              <td class="col-sm-4">
+              <td class="col-sm-2">
                 <button type="button" class="btn btn-info btn-sm" (click)="downloadCalendar(cal)">Download</button>                          
               </td>
             </tr>
