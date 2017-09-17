@@ -1,7 +1,7 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <div class="jumbotron">  
   <div class="container">
-    <h1>{{title}}</h1>
+    <h1 class="display-3">{{title}}</h1>
   </div>
   <div class="container">
     <button type="button" class="btn btn-primary" (click)="getDataFromEventbrite()">Get Events</button>      
@@ -14,15 +14,17 @@
       <table class="table table-hover">
           <thead class="thead-default">
             <tr class="row">
-              <th class="col-sm-2">Date</th>
+              <th class="col-sm-2">Date
+                <button type="button" class="btn btn-info btn-small" (click)="sortUpdate()">Sort</button>                      
+              </th>
               <th class="col-sm-6">Event</th>
               <th class="col-sm-4">Calendar</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="row" *ngFor="let cal of my_events">
+            <tr class="row" *ngFor="let cal of my_calevents">
               <td class="col-sm-2">
-                {{cal.eventdate}}
+                {{cal.eventdate | date}}
               </td>
               <td class="col-sm-6">
                 <a [href]="cal.url" target="_blank">{{cal.eventname}}</a><hr>
