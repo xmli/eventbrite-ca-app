@@ -19,16 +19,16 @@ import 'rxjs/add/observable/forkJoin'
 })
 export class AppComponent implements OnInit{
 
-  sort_NewToOld = true;
-  my_orders:EventbriteOrderInterface[];
-  my_calevents:IcalendarInfoInterface[] = [];
-  my_events = [{}];
+  public sort_NewToOld = true;
+  public my_orders:EventbriteOrderInterface[];
+  public my_calevents:IcalendarInfoInterface[] = [];
+  public my_events = [{}];
 
   constructor(private _eventbriteService: EventbriteService) { }
   
   ngOnInit() { }
 
-  getDataFromEventbrite() {
+  public getDataFromEventbrite() {
     console.log("Getting data from Eventbrite...");
     this._eventbriteService.getEvenbriteOrders()
     .subscribe(
@@ -48,7 +48,7 @@ export class AppComponent implements OnInit{
     );    
   }
 
-  createDownloadOptions(orders:EventbriteOrderInterface[]) {  
+  public createDownloadOptions(orders:EventbriteOrderInterface[]) {  
     let observableBatch = [];    
     orders.forEach(( element ) => {
       observableBatch.push( this._eventbriteService.getEventbriteEvent(element.event_id) );
@@ -102,7 +102,7 @@ export class AppComponent implements OnInit{
     );
   }
 
-  sortUpdate() {
+  public sortUpdate() {
     if(this.sort_NewToOld) {
       this.my_calevents.sort(this.sortOldToNew);      
     } else {
@@ -111,19 +111,19 @@ export class AppComponent implements OnInit{
     this.sort_NewToOld = !this.sort_NewToOld;
   }
 
-  sortOldToNew(a,b) {
+  public sortOldToNew(a,b) {
     var dateA = new Date(a.eventdate).getTime();
     var dateB = new Date(b.eventdate).getTime();
     return dateA > dateB ? 1 : -1;  
   }
 
-  sortNewToOld(a,b) {
+  public sortNewToOld(a,b) {
     var dateA = new Date(a.eventdate).getTime();
     var dateB = new Date(b.eventdate).getTime();
     return dateA > dateB ? -1 : 1;  
   }
 
-  buildCalendarEvent(ev, loc){    
+  public buildCalendarEvent(ev, loc){    
     var event:EventbriteEventInterface = ev;
     var location:EventbriteVenueInterface = loc;
 
@@ -165,7 +165,7 @@ export class AppComponent implements OnInit{
     });
   }
 
-  isEmpty(obj) {
+  public isEmpty(obj) {
     for(var key in obj) {
       if(obj.hasOwnProperty(key))
         return false;
@@ -173,7 +173,7 @@ export class AppComponent implements OnInit{
     return true;
   }
 
-  downloadCalendar(event:IcalendarInfoInterface) {
+  public downloadCalendar(event:IcalendarInfoInterface) {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(event.calbody));
     element.setAttribute('download', event.filename);
@@ -183,29 +183,29 @@ export class AppComponent implements OnInit{
     // document.body.removeChild(element);
   }
 
-  parseDate(utc_str) {
+  public parseDate(utc_str) {
     var parsed_date = utc_str.replace(/-|:/g, "");
     return parsed_date;
   }
 
-  parseVenue(venue) {
+  public parseVenue(venue) {
     return venue.replace(/,/g, " ");
   }
 
-  parseDescription(desc:string) {
+  public parseDescription(desc:string) {
     var firstNewLine = desc.indexOf('\n');
     return desc.substring(0, firstNewLine);
   }
 
-  truncateDescription(desc_str) {
+  public truncateDescription(desc_str) {
     return desc_str.substring(0,250) + "..."
   }
 
-  removeLastFileNameSpace(fn) {
+  public removeLastFileNameSpace(fn) {
     return fn.replace(/\s+$/, '');
   }
 
-  removeFirstNewLine(desc:string) {
+  public removeFirstNewLine(desc:string) {
     for (var i = 0; i < desc.length || i < 3; i++) {
       if (desc.indexOf('\n') == 0) {
         desc = desc.substring(1);
