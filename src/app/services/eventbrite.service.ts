@@ -38,4 +38,22 @@ export class EventbriteService {
         headers: new HttpHeaders().set('Authorization', 'Bearer ' + this.my_auth_token)
       })
   }
+
+  postOAuthToken(code) {
+    var api_url:string = "https://www.eventbrite.com/oauth/token";
+
+    var body_str = "code=" + code 
+    + "&client_secret=NEJTS4O4YOKRPCVP2IT5DEWPH44Q2JKMQQMMPM5X4FSLDR7IIM"
+    + "&client_id=URU55POLUBEJYWBHQF"
+    + "&grant_type=authorization_code";
+
+    console.log(body_str);
+    
+    var headers = new HttpHeaders().set('Content-type', 'application/x-www-form-urlencoded');
+    return this._http
+      .post(api_url,
+        body_str,
+      { headers: headers }
+    )
+  }
 }

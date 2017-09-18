@@ -23,10 +23,15 @@ export class AppComponent implements OnInit{
   public my_orders:EventbriteOrderInterface[];
   public my_calevents:IcalendarInfoInterface[] = [];
   public my_events = [{}];
+  public my_redirect = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF";
+  my_code = "";
 
   constructor(private _eventbriteService: EventbriteService) { }
   
-  ngOnInit() { }
+  ngOnInit() {
+    this.printCode();       
+  }
+
 
   public getDataFromEventbrite() {
     console.log("Getting data from Eventbrite...");
@@ -214,5 +219,24 @@ export class AppComponent implements OnInit{
     return desc;
   }
 
+  public printCode() {
+    var index = window.location.search.indexOf("?code=");
+    this.my_code = window.location.search.substring(index + 6);
+    if(this.my_code !== "") {
+      console.log(this.my_code);
+      this._eventbriteService.postOAuthToken(this.my_code)
+      .subscribe(
+        data => {
+          console.log(data);
+        }
+      ), 
+      (err) => console.error(err)
+    }
+  }
+
+  public redirect() {
+    window.location.href = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF"; 
+  }
+ 
   title = 'Quick Eventbrite Download';
 }
