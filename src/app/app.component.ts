@@ -19,21 +19,36 @@ import 'rxjs/add/observable/forkJoin'
 })
 export class AppComponent implements OnInit{
 
-  public sort_NewToOld = true;
-  public my_orders:EventbriteOrderInterface[];
-  public my_calevents:IcalendarInfoInterface[] = [];
-  public my_events = [{}];
-  public my_redirect = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF";
+  sort_NewToOld = true;
+  did_get_data = false;
+
+  my_orders:EventbriteOrderInterface[];
+  my_calevents:IcalendarInfoInterface[] = [];
+  my_events = [{}];
+  my_redirect = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF";
   my_code = "";
 
+  data_button = "Get Data";
+
+  my_auth_token:string = "";
   constructor(private _eventbriteService: EventbriteService) { }
   
   ngOnInit() {
-    this.printCode();       
+    this.printCode();           
   }
 
+  getDataFromEventbriteHelper() {
+    if(!this.did_get_data) {
+      this.getDataFromEventbrite();
+      this.did_get_data = true;    
+      this.data_button = "Refresh";      
+    } else {
+      this.my_calevents = [];
+      this.getDataFromEventbrite();
+    }
+  }
 
-  public getDataFromEventbrite() {
+  getDataFromEventbrite() {
     console.log("Getting data from Eventbrite...");
     this._eventbriteService.getEvenbriteOrders()
     .subscribe(
@@ -50,10 +65,12 @@ export class AppComponent implements OnInit{
       () => { //complete
         this.createDownloadOptions(this.my_orders);
       }
-    );    
+    );   
   }
 
-  public createDownloadOptions(orders:EventbriteOrderInterface[]) {  
+  
+
+  createDownloadOptions(orders:EventbriteOrderInterface[]) {  
     let observableBatch = [];    
     orders.forEach(( element ) => {
       observableBatch.push( this._eventbriteService.getEventbriteEvent(element.event_id) );
@@ -107,7 +124,7 @@ export class AppComponent implements OnInit{
     );
   }
 
-  public sortUpdate() {
+  sortUpdate() {
     if(this.sort_NewToOld) {
       this.my_calevents.sort(this.sortOldToNew);      
     } else {
@@ -116,19 +133,19 @@ export class AppComponent implements OnInit{
     this.sort_NewToOld = !this.sort_NewToOld;
   }
 
-  public sortOldToNew(a,b) {
+  sortOldToNew(a,b) {
     var dateA = new Date(a.eventdate).getTime();
     var dateB = new Date(b.eventdate).getTime();
     return dateA > dateB ? 1 : -1;  
   }
 
-  public sortNewToOld(a,b) {
+  sortNewToOld(a,b) {
     var dateA = new Date(a.eventdate).getTime();
     var dateB = new Date(b.eventdate).getTime();
     return dateA > dateB ? -1 : 1;  
   }
 
-  public buildCalendarEvent(ev, loc){    
+  buildCalendarEvent(ev, loc){    
     var event:EventbriteEventInterface = ev;
     var location:EventbriteVenueInterface = loc;
 
@@ -170,7 +187,7 @@ export class AppComponent implements OnInit{
     });
   }
 
-  public isEmpty(obj) {
+  isEmpty(obj) {
     for(var key in obj) {
       if(obj.hasOwnProperty(key))
         return false;
@@ -178,7 +195,7 @@ export class AppComponent implements OnInit{
     return true;
   }
 
-  public downloadCalendar(event:IcalendarInfoInterface) {
+  downloadCalendar(event:IcalendarInfoInterface) {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(event.calbody));
     element.setAttribute('download', event.filename);
@@ -188,29 +205,29 @@ export class AppComponent implements OnInit{
     // document.body.removeChild(element);
   }
 
-  public parseDate(utc_str) {
+  parseDate(utc_str) {
     var parsed_date = utc_str.replace(/-|:/g, "");
     return parsed_date;
   }
 
-  public parseVenue(venue) {
+  parseVenue(venue) {
     return venue.replace(/,/g, " ");
   }
 
-  public parseDescription(desc:string) {
+  parseDescription(desc:string) {
     var firstNewLine = desc.indexOf('\n');
     return desc.substring(0, firstNewLine);
   }
 
-  public truncateDescription(desc_str) {
+  truncateDescription(desc_str) {
     return desc_str.substring(0,250) + "..."
   }
 
-  public removeLastFileNameSpace(fn) {
+  removeLastFileNameSpace(fn) {
     return fn.replace(/\s+$/, '');
   }
 
-  public removeFirstNewLine(desc:string) {
+  removeFirstNewLine(desc:string) {
     for (var i = 0; i < desc.length || i < 3; i++) {
       if (desc.indexOf('\n') == 0) {
         desc = desc.substring(1);
@@ -219,22 +236,24 @@ export class AppComponent implements OnInit{
     return desc;
   }
 
-  public printCode() {
+  printCode() {
     var index = window.location.search.indexOf("?code=");
     this.my_code = window.location.search.substring(index + 6);
     if(this.my_code !== "") {
-      console.log(this.my_code);
+      // console.log(this.my_code);
       this._eventbriteService.postOAuthToken(this.my_code)
       .subscribe(
         data => {
-          console.log(data);
+          // console.log("The response from the POST is: ");
+          console.log(data.access_token);
+          this.my_auth_token = data.access_token;
         }
       ), 
       (err) => console.error(err)
     }
   }
 
-  public redirect() {
+  redirect() {
     window.location.href = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF"; 
   }
  

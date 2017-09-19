@@ -4,7 +4,8 @@
     <h1 class="display-3">{{title}}</h1>
   </div>
   <div class="container">
-    <button type="button" class="btn btn-primary" (click)="getDataFromEventbrite()">Get Events</button>      
+    <button type="button" [ngClass]="did_get_data?'btn btn-primary':'btn btn-success'" (click)="getDataFromEventbriteHelper()">{{data_button}}</button>    
+    <button type="button" class="btn btn-primary" (click)="redirect()">Get Info</button>   
   </div>
 </div>
 
@@ -46,5 +47,3 @@
     </div>
   </div>
 </div>
-
-<button type="button" (click)="redirect()">Get Info</button>

@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from "@angular/common/http
 import { EventbriteOrdersInterface } from "../interfaces/eventbrite-orders.interface";
 import { EventbriteEventInterface } from "../interfaces/eventbrite-event.interface";
 import { EventbriteVenueInterface } from "../interfaces/eventbrite-venue.interface";
+import { Oauth2Interface } from "../interfaces/oauth2.interface";
 
 @Injectable()
 export class EventbriteService {
@@ -16,7 +17,6 @@ export class EventbriteService {
   
   getEvenbriteOrders() {
     var api_url:string = this.eventbrite_api + "users/" + this.user_id + '/orders/';    
-    //http call
     return this._http
       .get<EventbriteOrdersInterface>(api_url, {
         headers: new HttpHeaders().set('Authorization', 'Bearer ' + this.my_auth_token)
@@ -40,18 +40,12 @@ export class EventbriteService {
   }
 
   postOAuthToken(code) {
-    var api_url:string = "https://www.eventbrite.com/oauth/token";
-
-    var body_str = "code=" + code 
-    + "&client_secret=NEJTS4O4YOKRPCVP2IT5DEWPH44Q2JKMQQMMPM5X4FSLDR7IIM"
-    + "&client_id=URU55POLUBEJYWBHQF"
-    + "&grant_type=authorization_code";
-
-    console.log(body_str);
+    var api_url:string = "http://localhost:8081/";
+    var body_str = "code=" + code;
     
     var headers = new HttpHeaders().set('Content-type', 'application/x-www-form-urlencoded');
     return this._http
-      .post(api_url,
+      .post<Oauth2Interface>(api_url,
         body_str,
       { headers: headers }
     )
