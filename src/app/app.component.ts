@@ -26,7 +26,7 @@ export class AppComponent implements OnInit{
   did_get_data = false;
 
   //boolean for authentication
-  is_authenticated = false;
+  is_authenticated:boolean;
 
   //variables for storing data from API
   my_orders:EventbriteOrderInterface[];
@@ -46,6 +46,9 @@ export class AppComponent implements OnInit{
   
   ngOnInit() {
     this.authenticate();
+    if(localStorage['curr_auth_token'] !== 'undefined') {
+      this.is_authenticated = true;                       
+    }
     if(localStorage['cached_calendar'] !== "undefined") {      
       this.did_get_data = true;          
       this.data_button = "Refresh";        
@@ -273,9 +276,12 @@ export class AppComponent implements OnInit{
           data => {
             localStorage['curr_auth_token'] = data.access_token;
             if(localStorage['curr_auth_token'] !== "undefined") alert("AUTHENTICATED!");
-            this.is_authenticated = true;     
+            window.location.href = window.location.href.substring(0, index);                        
           },
-          (err) => console.error(err)        
+          (err) => console.error(err),
+          () => {
+            this.is_authenticated = true;                 
+          }  
         )
       }
     }

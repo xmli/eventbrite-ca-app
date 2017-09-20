@@ -12,6 +12,7 @@ import { EventbriteAccountInterface } from "../interfaces/eventbrite-account.int
 export class EventbriteService {
 
   private eventbrite_api:string = "https://www.eventbriteapi.com/v3/";
+  private proxy_url:string = "https://eventbrite-node-server.herokuapp.com/";
 
   constructor(private _http: HttpClient) {}
   
@@ -56,7 +57,7 @@ export class EventbriteService {
   }
 
   postOAuthToken(code) {
-    var api_url:string = "http://localhost:8081/";
+    var api_url:string = this.proxy_url;
     var body_str = "code=" + code;
     var headers = new HttpHeaders().set('Content-type', 'application/x-www-form-urlencoded');
 
