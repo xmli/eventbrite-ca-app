@@ -302,8 +302,8 @@ export class AppComponent implements OnInit{
     this.did_get_data = false;
     this.data_button = "Get Data";
     this.is_authenticated = false;
-    if(window.location.href !== "http://localhost:4200/") {      
-      window.location.href = "http://localhost:4200/";      
+    if(window.location.href !== "https://xmli.github.io/eventbrite-cal-app/") {      
+      window.location.href = "https://xmli.github.io/eventbrite-cal-app/";      
     }
     alert("You have successfully logged out.");    
   }
