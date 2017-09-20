@@ -19,61 +19,87 @@ import 'rxjs/add/observable/forkJoin'
 })
 export class AppComponent implements OnInit{
 
+  //boolean flag for html table
   sort_NewToOld = true;
+
+  //boolean flag for refreshing data
   did_get_data = false;
 
+  //boolean for authentication
+  is_authenticated = false;
+
+  //variables for storing data from API
   my_orders:EventbriteOrderInterface[];
   my_calevents:IcalendarInfoInterface[] = [];
   my_events = [{}];
+
+  //redirect site for authorization
   my_redirect = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF";
+
+  //authorization code
   my_code = "";
 
+  //html data button
   data_button = "Get Data";
 
-  my_auth_token:string = "";
   constructor(private _eventbriteService: EventbriteService) { }
   
   ngOnInit() {
-    this.printCode();           
-  }
-
-  getDataFromEventbriteHelper() {
-    if(!this.did_get_data) {
-      this.getDataFromEventbrite();
-      this.did_get_data = true;    
-      this.data_button = "Refresh";      
-    } else {
-      this.my_calevents = [];
-      this.getDataFromEventbrite();
+    this.authenticate();
+    if(localStorage['cached_calendar'] !== "undefined") {      
+      this.did_get_data = true;          
+      this.data_button = "Refresh";        
+      this.my_calevents = JSON.parse(localStorage['cached_calendar']);
     }
   }
 
-  getDataFromEventbrite() {
-    console.log("Getting data from Eventbrite...");
-    this._eventbriteService.getEvenbriteOrders()
-    .subscribe(
-      data => { //callback function
-        this.my_orders = data.orders;        
-      },
-      (err: HttpErrorResponse) => {
-        if (err.error instanceof Error) {
-          console.log('An error occurred:', err.error.message);
-        } else {
-          console.log(`Backend returned code ${err.status}, body was: ${err.error}`);
-        }
-      },
-      () => { //complete
-        this.createDownloadOptions(this.my_orders);
+  getDataFromEventbriteHelper() {    
+    if(!this.did_get_data) {      
+      if(localStorage['curr_auth_token'] !== 'undefined') {
+        this.my_calevents = [];        
+        this.getDataFromEventbrite(localStorage['curr_auth_token']);
+        this.did_get_data = true;    
+        this.data_button = "Refresh";  
+      } else{
+        alert("Please authenticate first!");
       }
-    );   
+    } else {
+      this.my_calevents = [];
+      this.getDataFromEventbrite(localStorage['curr_auth_token']);
+    }
   }
 
-  
+  getDataFromEventbrite(auth_token:string) {
+    console.log("Getting data from Eventbrite...");
+    this._eventbriteService.getEventbriteSession(auth_token)
+    .subscribe(
+      data => {
+        var user_id = data.id;
+
+        this._eventbriteService.getEvenbriteOrders(user_id, auth_token)
+        .subscribe(
+          data => { //callback function
+            this.my_orders = data.orders;        
+          },
+          (err: HttpErrorResponse) => {
+            if (err.error instanceof Error) {
+              console.log('An error occurred:', err.error.message);
+            } else {
+              console.log(`Backend returned code ${err.status}, body was: ${err.error}`);
+            }
+          },
+          () => { //complete
+            this.createDownloadOptions(this.my_orders);
+          }
+        );  
+      }
+    ) 
+  }
 
   createDownloadOptions(orders:EventbriteOrderInterface[]) {  
     let observableBatch = [];    
     orders.forEach(( element ) => {
-      observableBatch.push( this._eventbriteService.getEventbriteEvent(element.event_id) );
+      observableBatch.push( this._eventbriteService.getEventbriteEvent(element.event_id, localStorage['curr_auth_token']) );
     });
 
     var subs = Observable.forkJoin(observableBatch)
@@ -92,7 +118,7 @@ export class AppComponent implements OnInit{
         let observableBatchInner = [];    
         this.my_events.forEach(( elem:EventbriteEventInterface ) => {
           if(elem.venue_id !== null) {
-            observableBatchInner.push( this._eventbriteService.getVenueLocation(elem.venue_id));
+            observableBatchInner.push( this._eventbriteService.getVenueLocation(elem.venue_id, localStorage['curr_auth_token']));
           } else {
             observableBatchInner.push( Observable.of({}));            
           }
@@ -117,7 +143,8 @@ export class AppComponent implements OnInit{
           },
           () => {
             this.my_calevents.sort(this.sortNewToOld);
-            console.log("Data loaded.")    
+            console.log("Data loaded.");
+            localStorage['cached_calendar'] = JSON.stringify(this.my_calevents);            
           } 
         );            
       }
@@ -236,25 +263,43 @@ export class AppComponent implements OnInit{
     return desc;
   }
 
-  printCode() {
-    var index = window.location.search.indexOf("?code=");
-    this.my_code = window.location.search.substring(index + 6);
-    if(this.my_code !== "") {
-      // console.log(this.my_code);
-      this._eventbriteService.postOAuthToken(this.my_code)
-      .subscribe(
-        data => {
-          // console.log("The response from the POST is: ");
-          console.log(data.access_token);
-          this.my_auth_token = data.access_token;
-        }
-      ), 
-      (err) => console.error(err)
+  authenticate() {
+    if(window.location.search.indexOf("?error=access_denied") == -1) {
+      var index = window.location.search.indexOf("?code=");
+      this.my_code = window.location.search.substring(index + 6);
+      if(this.my_code !== "") {
+        this._eventbriteService.postOAuthToken(this.my_code)
+        .subscribe(
+          data => {
+            localStorage['curr_auth_token'] = data.access_token;
+            if(localStorage['curr_auth_token'] !== "undefined") alert("AUTHENTICATED!");
+            this.is_authenticated = true;     
+          },
+          (err) => console.error(err)        
+        )
+      }
     }
   }
 
   redirect() {
-    window.location.href = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF"; 
+    if(localStorage['curr_auth_token'] == 'undefined') {            
+      window.location.href = "https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=URU55POLUBEJYWBHQF"; 
+    } else {
+      alert("You are already authenticated.");
+    }
+  }
+
+  logout() {
+    localStorage['curr_auth_token'] = "undefined";
+    localStorage['cached_calendar'] = "undefined";
+    this.my_calevents = [];
+    this.did_get_data = false;
+    this.data_button = "Get Data";
+    this.is_authenticated = false;
+    if(window.location.href !== "http://localhost:4200/") {      
+      window.location.href = "http://localhost:4200/";      
+    }
+    alert("You have successfully logged out.");    
   }
  
   title = 'Quick Eventbrite Download';
