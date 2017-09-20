@@ -1,12 +1,12 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <div class="jumbotron">  
   <div class="container">
-    <h1 class="display-3">{{title}}</h1>
+    <h1 class="display-3">{{title}}</h1><hr>
   </div>
   <div class="container">
     <button type="button" [ngClass]="did_get_data?'btn btn-primary':'btn btn-success'" (click)="getDataFromEventbriteHelper()">{{data_button}}</button>    
     <button type="button" class="btn btn-info" (click)="redirect()">Authenticate</button>  
-    <button type="button" class="btn btn-secondary" (click)="logout()">Logout</button>
+    <button type="button" class="btn btn-secondary" (click)="logout()">Logout</button><br><br>
     <h6 *ngIf="is_authenticated">Logged In</h6>    
   </div>
 </div>
