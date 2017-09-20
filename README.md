@@ -13,4 +13,4 @@ To use:
 
 =====================
 
-Built with Anguar4.0+, NodeJS http-proxy server middleware (hosted on heroku), Eventbrite API
+Built with Anguar4.0+, [https://github.com/xmli/eventbrite-node-server](NodeJS http-proxy server middleware) (hosted on heroku), Eventbrite API
